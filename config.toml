@@ -1,11 +1,11 @@
 baseurl = "https://techblog.lol/"
 languageCode = "en-us"
-title = "Techblog.lol"
+title = "techblog.lol"
 theme = "hyde-x"
 paginate = 10
 
 [author]
-    name = "ccbrown and vmrob"
+    name = ""
 
 # [permalinks]
 #     # Optional. Change the permalink format for the 'post' content type.
@@ -26,7 +26,7 @@ paginate = 10
     truncate = true
 
     # Used when a given page doesn't set its own.
-    # defaultDescription = "Your default page description"
+    defaultDescription = "This is out techblog. lol."
     # defaultKeywords = "your,default,page,keywords"
 
     # Changes sidebar background and link/accent colours.
