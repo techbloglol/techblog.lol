@@ -6,9 +6,8 @@ To run a local instance:
 
     brew update
     brew install hugo
-    git clone https://github.com/vmrob/techblog.lol.git
+    git clone https://github.com/techbloglol/techblog.lol.git --recursive
     cd techblog.lol
-    git submodule update --init
     hugo server --watch
 
 ---

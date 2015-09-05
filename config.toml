@@ -18,6 +18,6 @@ paginate = 10
 
     home = "Techblog"
 
-    github = "https://github.com/vmrob/techblog.lol"
+    github = "https://github.com/techbloglol/techblog.lol"
 
     rss = true
