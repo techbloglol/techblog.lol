@@ -21,3 +21,6 @@ paginate = 10
     github = "https://github.com/techbloglol/techblog.lol"
 
     rss = true
+
+[taxonomies]
+    tag = "tags"
