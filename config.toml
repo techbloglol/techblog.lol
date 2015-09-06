@@ -12,7 +12,7 @@ paginate = 10
 
     theme = "theme-base-00"
 
-    highlight = "sunburst"
+    highlight = "xcode"
 
     tagline = "This is our techblog. lol."
 
