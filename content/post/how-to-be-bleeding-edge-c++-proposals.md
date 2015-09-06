@@ -31,7 +31,7 @@ Here's another C++14 feature that you may find nice every now and then. For nume
 
 ```
 namespace {
-    constexpr int kSecondsInAWeak = 604'800;
+    constexpr int kSecondsInAWeek = 604'800;
 }
 ```
 
@@ -52,7 +52,7 @@ auto operator""_format() { return Formatter<String...>(); }
 
 void foo() {
     auto str = "Hello %s!\n"_format("world"); // okay!
-    auto str = "Hello %s!\n"_format(1); // compile time error! can't convert int to string
+    auto str = "Hello %s!\n"_format(1); // compile time error!
 }
 ```
 
@@ -68,22 +68,22 @@ If you've worked on well-organized libraries, you probably had to maintain code 
 
 ```
 namespace mycompany {
-namespace myapp {
+namespace mylib {
 namespace somecomponent {
 
 // stuff
 
-}}} // namespace mycompany::myapp::somecomponent
+}}} // namespace mycompany::mylib::somecomponent
 ```
 
 But if you're bleeding edge, now you can write this instead:
 
 ```
-namespace mycompany::myapp::somecomponent {
+namespace mycompany::mylib::somecomponent {
 
 // stuff
 
-} // namespace mycompany::myapp::somecomponent
+} // namespace mycompany::mylib::somecomponent
 ```
 
 The proposal: [N4230](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4230.html)
