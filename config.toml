@@ -24,3 +24,4 @@ paginate = 10
 
 [taxonomies]
     tag = "tags"
+    author = "author"
