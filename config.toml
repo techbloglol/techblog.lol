@@ -22,6 +22,8 @@ paginate = 10
 
     rss = true
 
+    googleAnalytics = "UA-67194265-1"
+
 [taxonomies]
     tag = "tags"
     author = "author"
