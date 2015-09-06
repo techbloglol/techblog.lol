@@ -1,10 +1,9 @@
 +++
-categories = []
-date = "2015-09-05T23:57:10-07:00"
-description = ""
-keywords = []
 title = "How to be bleeding edge – C++ proposals that'll change the way you code"
-
+author = "cbrown"
+description = "In this article, I'll go over a few of the most recently implemented C++ features and extensions in GCC and Clang. Some might just change the face of your code forever. At the very least, demonstrating your bleeding edge knowledge in interviews will be sure to get you some points."
+tags = ["c++", "code", "proposals", "bleeding edge"]
+date = "2015-09-05T23:57:10-07:00"
 +++
 
 In this article, I'll go over a few of the most recently implemented C++ features and extensions in GCC and Clang. Some might just change the face of your code forever. At the very least, demonstrating your bleeding edge knowledge in interviews will be sure to get you some points.
@@ -48,16 +47,20 @@ One use case is for a type-safe formatter:
 
 ```
 template<typename CharT, CharT... String>
-auto operator""_format() { return Formatter<String...>(); }
+auto operator""_format() {
+    static const CharT str[] = { String..., 0 };
+    return Formatter<String...>(str);
+}
 
 void foo() {
-    auto str = "Hello %s!\n"_format("world"); // okay!
-    auto str = "Hello %s!\n"_format(1); // compile time error!
+    auto str1 = "Hello %s!\n"_format("world"); // okay!
+    auto str2 = "Hello %s!\n"_format(1); // compile time error!
 }
 ```
 
 In this example, the `_format` suffix can create an object with a call operator that takes arguments of the correct type. So if you mix up your arguments or format specifiers, you get a compile time error.
 
+This is a proposal you'll definitely want to take a look at if you haven't already. It's written in a much more digestible way than most other proposals and includes full code samples for several really interesting use cases such as compile time string obfuscation.
 
 The proposal: [N3599](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3599.html)
 
@@ -88,8 +91,8 @@ namespace mycompany::mylib::somecomponent {
 
 The proposal: [N4230](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4230.html)
 
-Resources
-=========
+Additional Resources
+====================
 
 I've only included features that have implementations in GCC and Clang, but you can find a lot of interesting proposals under consideration in the [C++ Standard Evolution Active Issues List](http://cplusplus.github.io/EWG/ewg-active.html).
 
