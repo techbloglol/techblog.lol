@@ -15,7 +15,7 @@ Resiliency](https://d0.awsstatic.com/whitepapers/DDoS_White_Paper_June2015.pdf) 
 Setup
 =====
 
-All you have to do to get set up is create a Cloudflare account, add your website to it, and change your hosting's nameservers to Cloudflare's. It's a very quick and painless process. When you review your DNS, make sure the status icon is of the arrow going *through* the cloud.
+All you have to do to get set up is create a Cloudflare account, add your website to it, and change your hosting's nameservers to Cloudflare's. I'm not gonna go through the process step-by-step, but it's very quick and painless.
 
 Once you do this, you should take a look at your page rules. On the free Cloudflare plan, you get three. That's plenty for simple sites. We use one to ensure that visitors always get HTTPS. And another to set up the caching for all of our pages. By default, Cloudflare doesn't cache HTML, so because our site is 100% static, we use this rule to make sure it caches everything. Then whenever we update the site, we just clear the relevant pages from Cloudflare's cache with an [AWS Lambda](https://aws.amazon.com/lambda/) function and Cloudflare's REST API.
 
