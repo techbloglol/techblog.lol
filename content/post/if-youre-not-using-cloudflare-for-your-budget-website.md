@@ -19,6 +19,8 @@ All you have to do to get set up is create a Cloudflare account, add your websit
 
 Once you do this, you should take a look at your page rules. On the free Cloudflare plan, you get three. That's plenty for simple sites. We use one to ensure that visitors always get HTTPS. And another to set up the caching for all of our pages. By default, Cloudflare doesn't cache HTML, so because our site is 100% static, we use this rule to make sure it caches everything. Then whenever we update the site, we just clear the relevant pages from Cloudflare's cache with an [AWS Lambda](https://aws.amazon.com/lambda/) function and Cloudflare's REST API.
 
+When you're done with your setup, head over to [WebPagetest](http://www.webpagetest.org/) to see how you're doing. If you don't have near-perfect scores in everything, you might still be doing things wrong!
+
 So now what?
 ============
 
