@@ -5,7 +5,7 @@ tags = ["web", "cloudflare", "optimization", "security"]
 date = "2015-09-09T21:45:48-07:00"
 +++
 
-Does your website minify its HTML and Javascript? Does it compress its transfers? Is it using a CDN for static content? Does it protect your users' privace with TLS? Does it have a firewall to defend against attackers?
+Does your website minify its HTML and Javascript? Does it compress its transfers? Is it using a CDN for static content? Does it protect your users' privacy with TLS? Does it have a firewall to defend against attackers?
 
 If your answer to any of these questions is "no", you're definitely doing things wrong. And if you're on a budget, [Cloudflare](https://www.cloudflare.com) gives you all of these things, at absolutely **no cost**. I've racked my brain over this, and I have no idea why any informed web admin *wouldn't* use Cloudflare.
 
