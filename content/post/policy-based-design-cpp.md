@@ -62,8 +62,10 @@ int main() {
 What might be the strongest benefit to this design is that it greatly simplifies unit tests. The ability to swap in mock-policies and test subclasses in the absence of the parent class complexities is really what this is all about.
 
 ```C++
+#include <cassert>
+
 struct complex_algorithm {
-    static size_t calculate() { /* complex logic */ }
+    static size_t calculate() { /* complex logic */ return 0; }
 };
 
 template <typename policy>
@@ -74,9 +76,11 @@ struct foo : private policy {
 // Later in the test framework
 
 struct mock_algorithm {
-    static size_t expected = 0;
+    static size_t expected;
     static size_t calculate() { return expected; }
-}
+};
+
+size_t mock_algorithm::expected = 0;
 
 void foo_test() {
     mock_algorithm::expected = rand();
@@ -89,6 +93,11 @@ void foo_test() {
 
 void complex_algorithm_test() {
     // testing for the complex algorithm
+}
+
+int main() {
+    foo_test();
+    complex_algorithm_test();
 }
 ```
 
