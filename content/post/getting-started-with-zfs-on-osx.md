@@ -104,7 +104,7 @@ $ sudo zfs create -V 100T -s tank/huge-zvol
 
 The `-V 100T` argument tells zfs to create a zvol with a logical size of 100 TB. The `-s` argument tells zfs to create a sparse volume. That's to say that no initial space will be reserved, but added as needed when blocks are used.
 
-When creating a zvol, it is accessible from two locations: `/dev/disk*` and `/var/run/zfs/zvol/rdsk/*`. The second location is my preferred way to access the disk, but note that it is just a symlink to `/dev/disk*`.
+When creating a zvol, it is accessible from two locations: `/dev/disk*` and `/var/run/zfs/zvol/*`. The second location is my preferred way to access the disk, but note that it is just a symlink to the corresponding location on `/dev/disk*`.
 
 Another important thing to note is that a zvol will increase its space reservation even when writing zeros to the volume. If you enable compression on the volume via `zfs set compression=lz4 tank/huge-zvol`, all of the data stored on the volume will be compressed. When compression is enabled, blocks of storage that are entirely zero-filled are removed.
 
