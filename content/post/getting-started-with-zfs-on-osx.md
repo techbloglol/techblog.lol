@@ -11,13 +11,13 @@ So you've heard of "next gen" filesystems like [ZFS](https://en.wikipedia.org/wi
 
 # Disclaimer
 
-In my personal experience, ZFS on OS X is still somewhat buggy. I've never lost any data, but the occasional VFS deadlock isn't too uncommon and when that happens, the only thing you can really do is shut down the computer. When the VFS (Virtual Filesystem) locks up, everything that uses it, including just about all of your user-level programs, will block on vfs calls indefinitely. Your computer will appear to function but then the beach ball of death will silently take over everything.
-
-The maintainers over at the [OpenZFS on OS X project](https://github.com/openzfsonosx/zfs) are quite helpful and would love your stack traces and spindumps if you ever do encounter a problem. With any luck, my continued communication with them will resolve these specific issues.
+In my personal experience, ZFS on OS X is still somewhat buggy. I've never lost any data, but the occasional virtual filesystem (vfs) deadlock isn't too uncommon and when that happens, the only thing you can really do is shut down the computer. When the vfs locks up, everything that uses it, including just about all of your user-level programs, will block on vfs calls indefinitely. Your computer will appear to function but then the beach ball of death will silently take over everything.
 
 <center title="Copyright Allie Brosh -- http://hyperboleandahalf.blogspot.com/2010/05/sneaky-hate-spiral.html">![Copyright Allie Brosh -- http://hyperboleandahalf.blogspot.com/2010/05/sneaky-hate-spiral.html](images/you-must-wait.png)</center>
 
-That said, my desire to stuff as much data as I can into my SSD overrides the desire for a 100% stable system. As I mentioned before, I saved over 125 GB with compression alone and that has saved me hours of time trying to perform triage on files for my ever decreasing storage.
+The maintainers over at the [OpenZFS on OS X project](https://github.com/openzfsonosx/zfs) are quite helpful and would love your stack traces and spindumps if you ever do encounter a problem. With any luck, my continued communication with them will resolve these specific issues.
+
+That said, my desire to stuff as much data as I can into my ssd outweighs the desire for a 100% stable system. As I mentioned before, I saved over 125 GB with compression alone, and that has saved me hours of time trying to perform triage on files for my ever-decreasing storage.
 
 With all of that out of the way, I would still encourage the you to play with the system to see if it satisfies your use cases.
 
@@ -38,9 +38,9 @@ no pools available
 
 Before we jump into creating a zpool, why don't we cover some basic ZFS terminology so you actually know what a zpool _is_.
 
-In ZFS terms, a zpool is much like a virtual disk. It is presented a single volume to ZFS but can be composed of multiple disks including caching layers and with some disks reserved for redundancy or even hot spares. Zpools are managed by the `zpool` utility.
+In ZFS terms, a zpool is much like a virtual disk. It is presented as a single logical volume to ZFS but can be composed of multiple disks including caching layers and with some disks reserved for redundancy or even hot spares. Zpools are managed by the `zpool` utility.
 
-A ZFS dataset is much like what would normally be consider a partition on an older filesystem. Unlike a normal disk partition, you can nest datasets. Nested datasets inherit properties from their parents or can have properties set independently. A dataset is typically where your files will live and is the most user facing component of ZFS. Datasets are managed by the `zfs` utility.
+A ZFS dataset is much like what would normally be considered a partition on an older filesystem. Unlike a normal disk partition, you can nest datasets. Nested datasets inherit properties from their parents or can have properties set independently. A dataset is typically where your files will live and is the most user facing component of ZFS. Datasets are managed by the `zfs` utility.
 
 A zvol, or ZFS volume, is essentially a dataset presented as a block storage device. On OS X, this means that zvols live in `/dev/disk` and `/dev/rdisk` and can be formatted, partitioned, mounted, and manipulated the same way you work with physical disks. The advantage is that with a zvol, you get the benefits of ZFS at the block level. Zvols are also managed by the `zfs` utility.
 
@@ -93,8 +93,6 @@ $ sudo zfs allow vmrob create,mount,destroy tank
 There are a multitude of other permissions you can allow. To see these, run `zfs allow` with no arguments.
 
 # Create your first zvol
-
-ZVols are especially useful to me as a tool to manage hard disks for virtual machines. While that management is outside the scope of this tutorial, I'll provide some tutorials for this later.
 
 As zvols are essentially block storage devices managed by ZFS, they can be extremely useful for minimizing space used by such devices. In fact, you can even create sparse disk images with zero space reservation and allow that to expand in the future.
 
