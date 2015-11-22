@@ -1,21 +1,21 @@
 +++
 author = "vmrob"
 date = "2015-11-07T13:16:31-07:00"
-description = "So you've heard of next gen filesystems like ZFS and BTRFS and can't help but to get a little jealous that your simple-minded, consumer filesystem doesn't have newfangled features like copy-on-write, snapshots, de-duplication, and block-level compression. Using these features, I was able to halve the storage of my virtual machines saving me over 125 GB. In this article, I'll show you how to master ZFS on OS X using nothing but your existing Apple hardware."
+description = "So you've heard of next gen filesystems like ZFS and BTRFS and can't help but to get a little jealous that your simple-minded, consumer filesystem doesn't have newfangled features like copy-on-write, snapshots, de-duplication, and block-level compression. Using these features, I was able to halve the storage of my virtual machines saving over 125 GB. In this article, I'll show you how to master ZFS on OS X using nothing but your existing Apple hardware."
 tags = ['zfs', 'osx', 'workflow', 'power user']
 title = "Getting started with ZFS on OS X"
 
 +++
 
-So you've heard of "next gen" filesystems like [ZFS](https://en.wikipedia.org/wiki/ZFS) and [BTRFS](https://en.wikipedia.org/wiki/Btrfs) and can't help but to get a little jealous that your simple-minded, consumer filesystem doesn't have newfangled features like [copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write), snapshots, de-duplication, and block-level compression. Using these features, I was able to halve the storage of my virtual machines saving me over 125 GB. In this article, I'll show you how to master ZFS on OS X using nothing but your existing Apple hardware.
+So you've heard of "next gen" filesystems like [ZFS](https://en.wikipedia.org/wiki/ZFS) and [BTRFS](https://en.wikipedia.org/wiki/Btrfs) and can't help but to get a little jealous that your simple-minded, consumer filesystem doesn't have newfangled features like [copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write), snapshots, de-duplication, and block-level compression. Using these features, I was able to halve the storage of my virtual machines saving over 125 GB. In this article, I'll show you how to master ZFS on OS X using nothing but your existing Apple hardware.
 
 # Disclaimer
 
-In my personal experience, ZFS on OS X is still somewhat buggy. I've never lost any data, but the occasional virtual filesystem (vfs) deadlock isn't too uncommon and when that happens, the only thing you can really do is shut down the computer. When the vfs locks up, everything that uses it, including just about all of your user-level programs, will block on vfs calls indefinitely. Your computer will appear to function but then the beach ball of death will silently take over everything.
+In my personal experience, ZFS on OS X is still somewhat buggy. I've never lost any data, but the occasional virtual filesystem (vfs) deadlock isn't _too_ uncommon and when that happens, the only thing you can really do is power off the machine. When the vfs does lock up, everything that uses it (which is almost everything involving file io) will block on vfs calls indefinitely. Your computer will appear to function but then the beach ball of death will silently take over everything.
 
 <center title="Copyright Allie Brosh -- http://hyperboleandahalf.blogspot.com/2010/05/sneaky-hate-spiral.html">![Copyright Allie Brosh -- http://hyperboleandahalf.blogspot.com/2010/05/sneaky-hate-spiral.html](images/you-must-wait.png)</center>
 
-The maintainers over at the [OpenZFS on OS X project](https://github.com/openzfsonosx/zfs) are quite helpful and would love your stack traces and spindumps if you ever do encounter a problem. With any luck, my continued communication with them will resolve these specific issues.
+The maintainers over at the [OpenZFS on OS X project](https://github.com/openzfsonosx/zfs) are quite helpful and would love your stack traces and spindumps if you ever do encounter a problem and, with any luck, my continued communication with them will resolve some of these specific issues.
 
 That said, my desire to stuff as much data as I can into my ssd outweighs the desire for a 100% stable system. As I mentioned before, I saved over 125 GB with compression alone, and that has saved me hours of time trying to perform triage on files for my ever-decreasing storage.
 
@@ -27,7 +27,7 @@ The package that we will use here is OpenZFS on OS X (O3X for short). The instal
 
 The latest release for O3X can be found [here](https://openzfsonosx.org/wiki/Downloads).
 
-Once you've installed the package, you should have access to a few new tools from the command line. An easy way to test if the installation was successful is to query your system for the status of your (currently nonexistent) zpools.
+Once you've installed the package, you should have access to a few new tools from the command line. An easy way to test if the installation was successful is to query your system for the status of your [currently nonexistent] zpools.
 
 ```bash
 $ zpool list
@@ -38,17 +38,19 @@ no pools available
 
 Before we jump into creating a zpool, why don't we cover some basic ZFS terminology so you actually know what a zpool _is_.
 
-In ZFS terms, a zpool is much like a virtual disk. It is presented as a single logical volume to ZFS but can be composed of multiple disks including caching layers and with some disks reserved for redundancy or even hot spares. Zpools are managed by the `zpool` utility.
+In ZFS terms, a **zpool** is much like a virtual disk. It is presented as a single logical volume to ZFS but can be composed of multiple disks including caching layers and with some disks reserved for redundancy or even hot spares. Zpools are managed by the `zpool` utility.
 
-A ZFS dataset is much like what would normally be considered a partition on an older filesystem. Unlike a normal disk partition, you can nest datasets. Nested datasets inherit properties from their parents or can have properties set independently. A dataset is typically where your files will live and is the most user facing component of ZFS. Datasets are managed by the `zfs` utility.
+A ZFS **dataset** is much like what would normally be considered a partition on an older filesystem. Unlike a normal disk partition, you can nest datasets. Nested datasets inherit properties from their parents or can have properties set independently. A dataset is typically where your files will live and is the most user facing component of ZFS. Datasets are managed by the `zfs` utility.
 
-A zvol, or ZFS volume, is essentially a dataset presented as a block storage device. On OS X, this means that zvols live in `/dev/disk` and `/dev/rdisk` and can be formatted, partitioned, mounted, and manipulated the same way you work with physical disks. The advantage is that with a zvol, you get the benefits of ZFS at the block level. Zvols are also managed by the `zfs` utility.
+A **zvol**, or ZFS volume, is essentially a dataset presented as a block storage device. On OS X, this means that zvols live in `/dev/disk` and `/dev/rdisk` and can be formatted, partitioned, mounted, and manipulated the same way you work with physical disks. The advantage is that with a zvol, you get the benefits of ZFS at the block level. Zvols are also managed by the `zfs` utility.
 
-A snapshot is exactly what it sounds like: a preserved copy of a zfs dataset or zvol. Snapshots can be mounted (readonly) or cloned (read/write) and are created instantaneously due to ZFS's copy-on-write semantics. Not only can they be created instantaneously, but they also consume no initial space. Only when the underlying data starts to change does the snapshot grow in space proportional to the differences between the snapshot image vs the live image.
+A **snapshot** is exactly what it sounds like: a preserved copy of a ZFS dataset or zvol. Snapshots can be mounted (readonly) or cloned (read/write) and are created instantaneously due to ZFS's copy-on-write semantics. Not only can they be created instantaneously, but they also consume no initial space. Only when the underlying data starts to change does the snapshot grow in space proportional to the differences between the snapshot image vs the live image.
 
 # Determine where your zpool will live
 
 If you're like me, you're using FileVault for full disk encryption. While there are some clever [options for disk encryption](https://openzfsonosx.org/wiki/Encryption) with OpenZFS on OS X involving using CoreStorage's encryption under your zpool, I preferred a sparsebundle on top of my existing HFS+ partition. While not the most performant option, it allows me to back up my zpool using Time Machine without any trouble.
+
+>Keen observers will point out that ZFS provides an exceptional level fault tolerance _as long as ZFS manages the underlying disk_. In this example case, we are forgoing a certain level of fault tolerance for backup and storage convenience. Ideally, you would have a separate set of physical disks managed entirely by ZFS. This is ok provided you understand the risks. **ZFS is not a substitute for a backup**.
 
 Following in my footsteps, you can create a new sparsebundle from Disk Utility or via the command line. It's important to remember that we're not using a sparsebundle for saving space, only for backup savings with Time Machine. Be sure to keep your sparsebundle maximum size something manageable. You can always increase the size later.
 
@@ -58,7 +60,7 @@ If you don't use Time Machine or plan on backing up your zpool using some of the
 $ hdiutil create -type SPARSEBUNDLE -layout NONE -size 1G tank.sparsebundle
 ```
 
-If you created a sparsebundle, you're going to need to mount it before using it with zfs. If you're using a raw image file, you can skip the mount step and go straight to zpool creation.
+If you created a sparsebundle, you're going to need to mount it before using it with ZFS. If you're using a raw image file, you can skip the mount step and go straight to zpool creation.
 
 ```bash
 $ hdiutil attach -imagekey diskimage-class=CRawDiskImage -nomount tank.sparsebundle
@@ -68,7 +70,7 @@ This process will output a disk identifier usable with `zpool create` which brin
 
 # Create your first zpool
 
-Creating a zpool is actually fairly simple though does require administrative privilages. In this example, we'll create a pool called tank `backed` by `/dev/disk2`.
+Creating a zpool is actually fairly simple though does require administrative privilages. In this example, we'll create a pool called `tank` backed by `/dev/disk2`.
 
 ```bash
 $ sudo zpool create tank /dev/disk2
@@ -100,11 +102,11 @@ As zvols are essentially block storage devices managed by ZFS, they can be extre
 $ sudo zfs create -V 100T -s tank/huge-zvol
 ```
 
-The `-V 100T` argument tells zfs to create a zvol with a logical size of 100 TB. The `-s` argument tells zfs to create a sparse volume. That's to say that no initial space will be reserved, but added as needed when blocks are used.
+The `-V 100T` argument tells ZFS to create a zvol with a logical size of 100 TB. The `-s` argument tells ZFS to create a sparse volume. That's to say that no initial space will be reserved, but added as needed when blocks are used.
 
 When creating a zvol, it is accessible from two locations: `/dev/disk*` and `/var/run/zfs/zvol/*`. The second location is my preferred way to access the disk, but note that it is just a symlink to the corresponding location on `/dev/disk*`.
 
-Another important thing to note is that a zvol will increase its space reservation even when writing zeros to the volume. If you enable compression on the volume via `zfs set compression=lz4 tank/huge-zvol`, all of the data stored on the volume will be compressed. When compression is enabled, blocks of storage that are entirely zero-filled are removed.
+Another important thing to note is that a zvol will increase its space reservation _even when writing zeros to the volume_. If you enable compression on the volume via `zfs set compression=lz4 tank/huge-zvol`, all of the data stored on the volume will be compressed. When compression is enabled, blocks of storage that are entirely zero-filled are removed thus preventing a zero-filled volume from taking up any space. This is **really** important when using the underlying storage with virtual machines.
 
 ```bash
 $ sudo dd if=/dev/zero dd of=/var/run/zfs/zvol/rdsk/tank/huge-zvol
@@ -137,9 +139,9 @@ tank/huge-zvol     8K   974M     8K  -
 
 I touched on how to set some of the various properties that can apply to datasets in the previous section, but note that you need to remember to set these at least once.
 
-ZFS de-duplication is a tricky matter and, honestly, I wouldn't recommend it. The memory and cpu requirements for the dataset get to be pretty big and supposedly there's another stability issue to consider. I thought I would get some pretty big de-duplication ratios, but I've seen space savings of less than 5% on my biggest datasets.
+ZFS de-duplication is a tricky matter and, honestly, I wouldn't recommend it. The memory and cpu requirements for the dataset get to be pretty big and supposedly there's another stability issue to consider. I thought I would get some pretty big de-duplication ratios, but I've seen space savings of less than 5% on my biggest datasets which consist of what I assumed to be largly similar data (Windows VMs).
 
-Compression, on the other hand, is where it's at. ZFS allows for the excellent [lz4](https://cyan4973.github.io/lz4/) algorithm which is designed for speed. I would recommend keeping this enabled on all of your pools.
+Compression, on the other hand, is where it's at. ZFS allows for the excellent [lz4](https://cyan4973.github.io/lz4/) algorithm which is designed for speed that likely exceeds the throughput of your disks. I would recommend keeping this enabled on all of your pools.
 
 ```bash
 $ zfs set compression=lz4 tank
@@ -151,7 +153,7 @@ Another property you might want to consider setting might be `mountpoint` depend
 
 # Importing and Exporting zpools
 
-Obviously you'll need to be able to import and export pools. Import is basically the means to mount a zpool while export is the equivalent of unmounting it.
+Obviously you'll need to be able to import and export pools. Import is basically the means to mount a zpool while export is the means to unmount it.
 
 ```bash
 $ sudo zpool import tank
